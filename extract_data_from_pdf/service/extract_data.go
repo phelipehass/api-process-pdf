@@ -1,7 +1,7 @@
 package service
 
 import (
-	"api/extract_data_from_pdf/config"
+	"api/config"
 	"fmt"
 	"github.com/ledongthuc/pdf"
 	"strings"

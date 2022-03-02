@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api/extract_data_from_pdf/config"
+	"api/config"
 	"api/extract_data_from_pdf/delivery/api"
 	"api/extract_data_from_pdf/service"
 	"github.com/gofiber/fiber/v2"
