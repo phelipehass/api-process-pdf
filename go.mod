@@ -7,6 +7,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.28.0
 	github.com/joho/godotenv v1.4.0
 	github.com/ledongthuc/pdf v0.0.0-20210621053716-e28cb8259002
+	golang.org/x/text v0.3.7
 )
 
 require (

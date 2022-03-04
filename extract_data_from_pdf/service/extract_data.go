@@ -4,6 +4,7 @@ import (
 	"api/config"
 	"fmt"
 	"github.com/ledongthuc/pdf"
+	"regexp"
 	"strings"
 )
 
@@ -38,6 +39,7 @@ func (s *ExtractService) ExtractDataFromPDF(pdfPath string) error {
 
 	totalPages := pdfReader.NumPage()
 	processTextUntilNextTitle := false
+	data := ""
 
 	for pageIndex := 1; pageIndex <= totalPages; pageIndex++ {
 		err = nil
@@ -66,18 +68,25 @@ func (s *ExtractService) ExtractDataFromPDF(pdfPath string) error {
 			continue
 		}
 
-		isBreak := s.processTextByRow(rows, pageWithIndications, pageIndex)
+		isBreak, pageData := s.processTextByRow(rows, pageWithIndications, pageIndex)
+		if pageIndex != pageWithIndications {
+			data += pageData
+		} else {
+			data += strings.Replace(pageData, " INDICAÇÕES |", "", 1)
+		}
+
 		if isBreak {
 			break
 		}
 
 	}
 
+	s.ProcessData(data)
+
 	return nil
 }
 
-func (s *ExtractService) processTextByRow(rows pdf.Rows, pageWithIndications int, pageIndex int) bool {
-	//TODO melhorar processamento, pois só está logando dado extraído
+func (s *ExtractService) processTextByRow(rows pdf.Rows, pageWithIndications int, pageIndex int) (bool, string) {
 	markRow := -1
 	isBreak := false
 	textByRow := ""
@@ -91,17 +100,12 @@ func (s *ExtractService) processTextByRow(rows pdf.Rows, pageWithIndications int
 
 			if pageWithIndications == pageIndex && strings.Contains(word.S, s.InitExtraction) {
 				markRow = valueRow
-				textByRow += word.S
+				textByRow += " " + word.S
 			} else if pageWithIndications == pageIndex && markRow != -1 && valueRow > markRow {
-				textByRow += word.S
+				textByRow += " " + word.S
 			} else if pageIndex > pageWithIndications && !strings.Contains(word.S, s.Title) && !strings.Contains(word.S, s.Subtitle) {
-				textByRow += word.S
+				textByRow += " " + word.S
 			}
-		}
-
-		if len(textByRow) > 0 {
-			fmt.Println(textByRow)
-			textByRow = ""
 		}
 
 		if isBreak {
@@ -109,5 +113,16 @@ func (s *ExtractService) processTextByRow(rows pdf.Rows, pageWithIndications int
 		}
 	}
 
-	return isBreak
+	if len(textByRow) > 0 {
+		textByRow = replaceFirstDegreeSymbol(textByRow)
+	}
+
+	return isBreak, textByRow
+}
+
+func replaceFirstDegreeSymbol(line string) string {
+	re := regexp.MustCompile(`N[^a-zA-Z0-9]+`)
+	subst := "|"
+
+	return re.ReplaceAllString(line, subst)
 }
