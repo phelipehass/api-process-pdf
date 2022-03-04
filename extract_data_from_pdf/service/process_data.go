@@ -15,6 +15,7 @@ type ProcessData struct {
 	Entourage             string
 	Street                string
 	District              string
+	Description           string
 }
 
 func (s *ExtractService) ProcessData(data string) {
@@ -27,11 +28,13 @@ func (s *ExtractService) ProcessData(data string) {
 		processData.NumberIndication = object[0]
 		processData.NamePersonResponsible = object[1]
 		processData.Entourage = object[2]
+		processData.Description = object[3]
 		processData.District = processStreet(object[3])
 		//TODO criar process da rua para extrair
 		processDatas = append(processDatas, processData)
 	}
 
+	//TODO após processamento, salvar no banco
 	fmt.Println(indications)
 }
 
@@ -41,8 +44,12 @@ func processStreet(description string) string {
 	_, start := searchMatcher.IndexString(description, "bairro")
 	if start != -1 {
 		start += IGNORE_SPACE
-		finish := len(description) - 1
+		finish := len(description)
 		district = description[start:finish]
+		removeAllCharAfterPointer, _ := searchMatcher.IndexString(district, ".")
+		if removeAllCharAfterPointer != -1 {
+			district = district[:removeAllCharAfterPointer]
+		}
 	}
 
 	return district
