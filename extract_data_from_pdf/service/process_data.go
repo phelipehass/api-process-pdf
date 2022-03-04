@@ -42,14 +42,15 @@ func processStreet(description string) string {
 	district := ""
 	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
 	_, start := searchMatcher.IndexString(description, "bairro")
+
 	if start != -1 {
-		start += IGNORE_SPACE
-		finish := len(description)
-		district = description[start:finish]
-		removeAllCharAfterPointer, _ := searchMatcher.IndexString(district, ".")
-		if removeAllCharAfterPointer != -1 {
-			district = district[:removeAllCharAfterPointer]
+		removeAllCharAfterPointer, _ := searchMatcher.IndexString(description, ".")
+		if removeAllCharAfterPointer == -1 {
+			removeAllCharAfterPointer = len(description)
 		}
+
+		start += IGNORE_SPACE
+		district = description[start:removeAllCharAfterPointer]
 	}
 
 	return district
