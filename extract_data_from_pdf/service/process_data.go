@@ -29,7 +29,7 @@ func (s *ExtractService) ProcessData(data string) {
 		processData.NamePersonResponsible = object[1]
 		processData.Entourage = object[2]
 		processData.Description = object[3]
-		processData.District = processStreet(object[3])
+		processData.District = processDistrict(object[3])
 		//TODO criar process da rua para extrair
 		processDatas = append(processDatas, processData)
 	}
@@ -38,7 +38,7 @@ func (s *ExtractService) ProcessData(data string) {
 	fmt.Println(indications)
 }
 
-func processStreet(description string) string {
+func processDistrict(description string) string {
 	district := ""
 	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
 	_, start := searchMatcher.IndexString(description, "bairro")
