@@ -30,7 +30,7 @@ func (s *ExtractService) ProcessData(data string) {
 		processData.Entourage = object[2]
 		processData.Description = object[3]
 		processData.District = processDistrict(object[3])
-		//TODO criar process da rua para extrair
+		processData.Street = processStreet(object[3])
 		processDatas = append(processDatas, processData)
 	}
 
@@ -54,4 +54,31 @@ func processDistrict(description string) string {
 	}
 
 	return district
+}
+
+func processStreet(description string) string {
+	street := ""
+	start := 0
+	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
+	patterns := [4]string{"rua", "servidão", "estrada", "avenida"}
+
+	for _, pattern := range patterns {
+		start, _ = searchMatcher.IndexString(description, pattern)
+
+		if start != -1 {
+			break
+		}
+	}
+
+	if start != -1 {
+		sizeDesc := len(description)
+		descriptionTreated := description[start:sizeDesc]
+		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
+		if removeAllCharAfterComma != -1 {
+			start += IGNORE_SPACE
+			street = descriptionTreated[0:removeAllCharAfterComma]
+		}
+	}
+
+	return street
 }
