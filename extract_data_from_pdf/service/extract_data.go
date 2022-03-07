@@ -3,7 +3,9 @@ package service
 import (
 	"api/config"
 	"fmt"
+	"github.com/apex/log"
 	"github.com/ledongthuc/pdf"
+	"mime/multipart"
 	"regexp"
 	"strings"
 )
@@ -24,15 +26,20 @@ func NewService() *ExtractService {
 	}
 }
 
-func (s *ExtractService) ExtractDataFromPDF(pdfPath string) error {
-	file, pdfReader, err := pdf.Open(pdfPath)
+func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) error {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			fmt.Println("[ExtractDataFromPDF] - Aconteceu um erro inesperado")
 		}
 	}()
 
+	file, err := fileBuffer.Open()
+	if err != nil {
+		return err
+	}
+
 	defer file.Close()
+	pdfReader, err := pdf.NewReader(file, fileBuffer.Size)
 	if err != nil {
 		return err
 	}
@@ -65,6 +72,7 @@ func (s *ExtractService) ExtractDataFromPDF(pdfPath string) error {
 		text = ""
 		rows, err := pageFile.GetTextByRow()
 		if err != nil {
+			log.Error(err.Error())
 			continue
 		}
 
