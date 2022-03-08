@@ -19,20 +19,22 @@ type ProcessData struct {
 	Description           string
 }
 
-func (s *ExtractService) ProcessData(data string) {
-	indications := strings.Split(data, "|")
+func (s *ExtractService) ProcessData(data *string) {
+	indications := strings.Split(*data, "|")
 	var processDatas []ProcessData
 	var processData ProcessData
 
 	for _, indication := range indications {
 		object := strings.Split(indication, " - ")
 		processData.NumberIndication = object[0]
-		log.Infof("número da indicação: %s", object[0])
+		log.Infof("Número da indicação: %s", object[0])
 		processData.NamePersonResponsible = object[1]
 		processData.Entourage = object[2]
 		processData.Description = object[3]
 		processData.District = processDistrict(object[3])
+		log.Infof("Bairro: %s", processData.District)
 		processData.Street = processStreet(object[3])
+		log.Infof("Rua: %s", processData.Street)
 		processDatas = append(processDatas, processData)
 	}
 

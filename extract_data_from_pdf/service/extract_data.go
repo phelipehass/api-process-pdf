@@ -38,18 +38,26 @@ func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) er
 		return err
 	}
 
-	defer file.Close()
 	pdfReader, err := pdf.NewReader(file, fileBuffer.Size)
 	if err != nil {
 		return err
 	}
 
 	totalPages := pdfReader.NumPage()
-	processTextUntilNextTitle := false
-	data := ""
+	data := s.processFilePerPage(pdfReader, &totalPages)
+	file.Close()
+	s.ProcessData(data)
 
-	for pageIndex := 1; pageIndex <= totalPages; pageIndex++ {
-		err = nil
+	return nil
+}
+
+func (s *ExtractService) processFilePerPage(pdfReader *pdf.Reader, totalPages *int) *string {
+	data := ""
+	pageIndex := 1
+	processTextUntilNextTitle := false
+
+	for pageIndex = 1; pageIndex <= *totalPages; pageIndex++ {
+		var err error = nil
 		var pageWithIndications int
 		pageFile := pdfReader.Page(pageIndex)
 
@@ -76,7 +84,7 @@ func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) er
 			continue
 		}
 
-		isBreak, pageData := s.processTextByRow(rows, pageWithIndications, pageIndex)
+		isBreak, pageData := s.processTextByRow(&rows, &pageWithIndications, &pageIndex)
 		if pageIndex != pageWithIndications {
 			data += pageData
 		} else {
@@ -86,32 +94,29 @@ func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) er
 		if isBreak {
 			break
 		}
-
 	}
 
-	s.ProcessData(data)
-
-	return nil
+	return &data
 }
 
-func (s *ExtractService) processTextByRow(rows pdf.Rows, pageWithIndications int, pageIndex int) (bool, string) {
+func (s *ExtractService) processTextByRow(rows *pdf.Rows, pageWithIndications *int, pageIndex *int) (bool, string) {
 	markRow := -1
 	isBreak := false
 	textByRow := ""
 
-	for valueRow, row := range rows {
+	for valueRow, row := range *rows {
 		for _, word := range row.Content {
 			if strings.Contains(word.S, s.FinishExtraction) {
 				isBreak = true
 				break
 			}
 
-			if pageWithIndications == pageIndex && strings.Contains(word.S, s.InitExtraction) {
+			if *pageWithIndications == *pageIndex && strings.Contains(word.S, s.InitExtraction) {
 				markRow = valueRow
 				textByRow += " " + word.S
-			} else if pageWithIndications == pageIndex && markRow != -1 && valueRow > markRow {
+			} else if *pageWithIndications == *pageIndex && markRow != -1 && valueRow > markRow {
 				textByRow += " " + word.S
-			} else if pageIndex > pageWithIndications && !strings.Contains(word.S, s.Title) && !strings.Contains(word.S, s.Subtitle) {
+			} else if *pageIndex > *pageWithIndications && !strings.Contains(word.S, s.Title) && !strings.Contains(word.S, s.Subtitle) {
 				textByRow += " " + word.S
 			}
 		}
