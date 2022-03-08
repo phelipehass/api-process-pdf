@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/apex/log"
 	"golang.org/x/text/language"
 	"golang.org/x/text/search"
 	"strings"
@@ -26,6 +27,7 @@ func (s *ExtractService) ProcessData(data string) {
 	for _, indication := range indications {
 		object := strings.Split(indication, " - ")
 		processData.NumberIndication = object[0]
+		log.Infof("número da indicação: %s", object[0])
 		processData.NamePersonResponsible = object[1]
 		processData.Entourage = object[2]
 		processData.Description = object[3]
@@ -44,13 +46,12 @@ func processDistrict(description string) string {
 	_, start := searchMatcher.IndexString(description, "bairro")
 
 	if start != -1 {
-		removeAllCharAfterPointer, _ := searchMatcher.IndexString(description, ".")
-		if removeAllCharAfterPointer == -1 {
-			removeAllCharAfterPointer = len(description)
+		sizeDesc := len(description)
+		descriptionTreated := description[start:sizeDesc]
+		removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
+		if removeAllCharAfterPointer != -1 {
+			district = description[0:removeAllCharAfterPointer]
 		}
-
-		start += IGNORE_SPACE
-		district = description[start:removeAllCharAfterPointer]
 	}
 
 	return district
@@ -75,7 +76,6 @@ func processStreet(description string) string {
 		descriptionTreated := description[start:sizeDesc]
 		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
 		if removeAllCharAfterComma != -1 {
-			start += IGNORE_SPACE
 			street = descriptionTreated[0:removeAllCharAfterComma]
 		}
 	}
