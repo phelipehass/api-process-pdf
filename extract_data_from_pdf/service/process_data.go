@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/apex/log"
 	"golang.org/x/text/language"
 	"golang.org/x/text/search"
@@ -39,7 +38,7 @@ func (s *ExtractService) ProcessData(data *string) {
 	}
 
 	//TODO após processamento, salvar no banco
-	fmt.Println(indications)
+	//fmt.Println(indications)
 }
 
 func processDistrict(description string) string {
@@ -92,12 +91,18 @@ func processStreet(description string) string {
 	if start != -1 {
 		sizeDesc := len(description)
 		descriptionTreated := description[start:sizeDesc]
+		removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
+
+		if removeAllCharAfterPointer != -1 {
+			descriptionTreated = descriptionTreated[0:removeAllCharAfterPointer]
+		}
+
 		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
 		if removeAllCharAfterComma != -1 {
-			street = descriptionTreated[0:removeAllCharAfterComma]
-		} else {
-			street = descriptionTreated
+			descriptionTreated = descriptionTreated[0:removeAllCharAfterComma]
 		}
+
+		street = descriptionTreated
 	}
 
 	return street
