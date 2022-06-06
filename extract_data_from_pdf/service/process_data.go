@@ -19,7 +19,7 @@ type ProcessData struct {
 }
 
 func (s *ExtractService) ProcessData(data *string) {
-	indications := strings.Split(*data, "|")
+	indications := strings.Split(*data, "|||")
 	var processDatas []ProcessData
 	var processData ProcessData
 

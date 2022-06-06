@@ -88,7 +88,7 @@ func (s *ExtractService) processFilePerPage(pdfReader *pdf.Reader, totalPages *i
 		if pageIndex != pageWithIndications {
 			data += pageData
 		} else {
-			data += strings.Replace(pageData, " INDICAÇÕES |", "", 1)
+			data += strings.Replace(pageData, " INDICAÇÕES |||", "", 1)
 		}
 
 		if isBreak {
@@ -111,6 +111,13 @@ func (s *ExtractService) processTextByRow(rows *pdf.Rows, pageWithIndications *i
 				break
 			}
 
+			//tratativa
+			re := regexp.MustCompile(`N[^a-zA-Z0-9]+`)
+			loc := re.FindStringIndex(word.S)
+			if loc != nil && loc[0] >= 0 && loc[0] < 10 {
+				word.S = replaceFirstDegreeSymbol("F" + word.S)
+			}
+
 			if *pageWithIndications == *pageIndex && strings.Contains(word.S, s.InitExtraction) {
 				markRow = valueRow
 				textByRow += " " + word.S
@@ -126,16 +133,12 @@ func (s *ExtractService) processTextByRow(rows *pdf.Rows, pageWithIndications *i
 		}
 	}
 
-	if len(textByRow) > 0 {
-		textByRow = replaceFirstDegreeSymbol(textByRow)
-	}
-
 	return isBreak, textByRow
 }
 
 func replaceFirstDegreeSymbol(line string) string {
-	re := regexp.MustCompile(`N[^a-zA-Z0-9]+`)
-	subst := "|"
+	re := regexp.MustCompile(`FN[^a-zA-Z0-9]+`)
+	subst := "|||"
 
 	return re.ReplaceAllString(line, subst)
 }
