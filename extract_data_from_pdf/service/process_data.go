@@ -44,16 +44,32 @@ func (s *ExtractService) ProcessData(data *string) {
 
 func processDistrict(description string) string {
 	district := ""
+	start := 0
 	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
-	_, start := searchMatcher.IndexString(description, "bairro")
+	patterns := [2]string{"bairro", "distrito"}
+
+	for _, pattern := range patterns {
+		_, start = searchMatcher.IndexString(description, pattern)
+
+		if start != -1 {
+			break
+		}
+	}
 
 	if start != -1 {
 		sizeDesc := len(description)
 		descriptionTreated := description[start:sizeDesc]
 		removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
 		if removeAllCharAfterPointer != -1 {
-			district = description[0:removeAllCharAfterPointer]
+			descriptionTreated = descriptionTreated[0:removeAllCharAfterPointer]
 		}
+
+		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
+		if removeAllCharAfterComma != -1 {
+			descriptionTreated = descriptionTreated[0:removeAllCharAfterComma]
+		}
+
+		district = descriptionTreated
 	}
 
 	return district
@@ -63,7 +79,7 @@ func processStreet(description string) string {
 	street := ""
 	start := 0
 	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
-	patterns := [4]string{"rua", "servidão", "estrada", "avenida"}
+	patterns := [5]string{"rua", "servidão", "estrada", "avenida", "ruas"}
 
 	for _, pattern := range patterns {
 		start, _ = searchMatcher.IndexString(description, pattern)
@@ -79,6 +95,8 @@ func processStreet(description string) string {
 		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
 		if removeAllCharAfterComma != -1 {
 			street = descriptionTreated[0:removeAllCharAfterComma]
+		} else {
+			street = descriptionTreated
 		}
 	}
 
