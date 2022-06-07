@@ -58,17 +58,7 @@ func processDistrict(description string) string {
 	if start != -1 {
 		sizeDesc := len(description)
 		descriptionTreated := description[start:sizeDesc]
-		removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
-		if removeAllCharAfterPointer != -1 {
-			descriptionTreated = descriptionTreated[0:removeAllCharAfterPointer]
-		}
-
-		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
-		if removeAllCharAfterComma != -1 {
-			descriptionTreated = descriptionTreated[0:removeAllCharAfterComma]
-		}
-
-		district = descriptionTreated
+		district = removeAllCharacterRemaining(descriptionTreated, searchMatcher)
 	}
 
 	return district
@@ -78,7 +68,7 @@ func processStreet(description string) string {
 	street := ""
 	start := 0
 	searchMatcher := search.New(language.Portuguese, search.IgnoreCase)
-	patterns := [5]string{"rua", "servidão", "estrada", "avenida", "ruas"}
+	patterns := [6]string{"rua", "servidão", "estrada", "avenida", "ruas", "av"}
 
 	for _, pattern := range patterns {
 		start, _ = searchMatcher.IndexString(description, pattern)
@@ -91,19 +81,28 @@ func processStreet(description string) string {
 	if start != -1 {
 		sizeDesc := len(description)
 		descriptionTreated := description[start:sizeDesc]
-		removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
+		removeAllWordAfterDistrict, _ := searchMatcher.IndexString(descriptionTreated, "no bairro")
 
-		if removeAllCharAfterPointer != -1 {
-			descriptionTreated = descriptionTreated[0:removeAllCharAfterPointer]
+		if removeAllWordAfterDistrict != -1 {
+			descriptionTreated = descriptionTreated[0:removeAllWordAfterDistrict]
 		}
-
-		removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
-		if removeAllCharAfterComma != -1 {
-			descriptionTreated = descriptionTreated[0:removeAllCharAfterComma]
-		}
-
-		street = descriptionTreated
+		street = removeAllCharacterRemaining(descriptionTreated, searchMatcher)
 	}
 
 	return street
+}
+
+func removeAllCharacterRemaining(descriptionTreated string, searchMatcher *search.Matcher) string {
+	removeAllCharAfterPointer, _ := searchMatcher.IndexString(descriptionTreated, ".")
+
+	if removeAllCharAfterPointer != -1 {
+		descriptionTreated = descriptionTreated[0:removeAllCharAfterPointer]
+	}
+
+	removeAllCharAfterComma, _ := searchMatcher.IndexString(descriptionTreated, ",")
+	if removeAllCharAfterComma != -1 {
+		descriptionTreated = descriptionTreated[0:removeAllCharAfterComma]
+	}
+
+	return descriptionTreated
 }
