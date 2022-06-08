@@ -46,7 +46,9 @@ func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) er
 	totalPages := pdfReader.NumPage()
 	data := s.processFilePerPage(pdfReader, &totalPages)
 	file.Close()
-	s.ProcessData(data)
+
+	//TODO sofrerá alteração
+	_ = s.ProcessData(data)
 
 	return nil
 }

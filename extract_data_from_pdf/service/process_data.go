@@ -18,27 +18,30 @@ type ProcessData struct {
 	Description           string
 }
 
-func (s *ExtractService) ProcessData(data *string) {
+func (s *ExtractService) ProcessData(data *string) []ProcessData {
 	indications := strings.Split(*data, "|||")
 	var processDatas []ProcessData
 	var processData ProcessData
 
 	for _, indication := range indications {
 		object := strings.Split(indication, " - ")
-		processData.NumberIndication = object[0]
-		log.Infof("Número da indicação: %s", object[0])
-		processData.NamePersonResponsible = object[1]
-		processData.Entourage = object[2]
-		processData.Description = object[3]
-		processData.District = processDistrict(object[3])
-		log.Infof("Bairro: %s", processData.District)
-		processData.Street = processStreet(object[3])
-		log.Infof("Rua: %s", processData.Street)
-		processDatas = append(processDatas, processData)
+
+		if len(object) > 2 {
+			processData.NumberIndication = object[0]
+			log.Infof("Número da indicação: %s", object[0])
+			processData.NamePersonResponsible = object[1]
+			processData.Entourage = object[2]
+			processData.Description = strings.TrimSpace(object[3])
+			processData.District = processDistrict(object[3])
+			log.Infof("Bairro: %s", processData.District)
+			processData.Street = processStreet(object[3])
+			log.Infof("Rua: %s", processData.Street)
+			processDatas = append(processDatas, processData)
+		}
 	}
 
 	//TODO após processamento, salvar no banco
-	//fmt.Println(indications)
+	return processDatas
 }
 
 func processDistrict(description string) string {
@@ -61,7 +64,7 @@ func processDistrict(description string) string {
 		district = removeAllCharacterRemaining(descriptionTreated, searchMatcher)
 	}
 
-	return district
+	return strings.TrimSpace(district)
 }
 
 func processStreet(description string) string {
@@ -89,7 +92,7 @@ func processStreet(description string) string {
 		street = removeAllCharacterRemaining(descriptionTreated, searchMatcher)
 	}
 
-	return street
+	return strings.TrimSpace(street)
 }
 
 func removeAllCharacterRemaining(descriptionTreated string, searchMatcher *search.Matcher) string {
