@@ -1,6 +1,8 @@
 package service
 
 import (
+	"api/models"
+	"database/sql"
 	"github.com/apex/log"
 	"golang.org/x/text/language"
 	"golang.org/x/text/search"
@@ -9,19 +11,10 @@ import (
 
 var IGNORE_SPACE = 1
 
-type ProcessData struct {
-	NumberIndication      string
-	NamePersonResponsible string
-	Entourage             string
-	Street                string
-	District              string
-	Description           string
-}
-
-func (s *ExtractService) ProcessData(data *string) []ProcessData {
+func (s *ExtractService) ProcessData(data *string) []models.Indication {
 	indications := strings.Split(*data, "|||")
-	var processDatas []ProcessData
-	var processData ProcessData
+	var processDatas []models.Indication
+	var processData models.Indication
 
 	for _, indication := range indications {
 		object := strings.Split(indication, " - ")
@@ -32,9 +25,19 @@ func (s *ExtractService) ProcessData(data *string) []ProcessData {
 			processData.NamePersonResponsible = object[1]
 			processData.Entourage = object[2]
 			processData.Description = strings.TrimSpace(object[3])
-			processData.District = processDistrict(object[3])
+
+			district := processDistrict(object[3])
+			if district != "" {
+				processData.District = sql.NullString{String: district, Valid: true}
+			}
+
 			log.Infof("Bairro: %s", processData.District)
-			processData.Street = processStreet(object[3])
+
+			street := processStreet(object[3])
+			if street != "" {
+				processData.Street = sql.NullString{String: street, Valid: true}
+			}
+
 			log.Infof("Rua: %s", processData.Street)
 			processDatas = append(processDatas, processData)
 		}

@@ -10,8 +10,12 @@ import (
 func main() {
 	//TODO adicionar middleware
 	config.LoadEnv()
+	db := config.InitPostgres()
+	defer db.Close()
+
 	app := fiber.New()
 	extractService := service.NewService()
+
 	api.Handlers(app, extractService)
 	app.Listen(":" + config.ApiPort())
 }
