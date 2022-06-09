@@ -2,6 +2,7 @@ package service
 
 import (
 	"api/config"
+	"api/extract_data_from_pdf/repository"
 	"fmt"
 	"github.com/apex/log"
 	"github.com/ledongthuc/pdf"
@@ -11,18 +12,20 @@ import (
 )
 
 type ExtractService struct {
-	InitExtraction   string
-	FinishExtraction string
-	Title            string
-	Subtitle         string
+	InitExtraction       string
+	FinishExtraction     string
+	Title                string
+	Subtitle             string
+	IndicationRepository *repository.PostgresRepository
 }
 
-func NewService() *ExtractService {
+func NewService(indicationRepo *repository.PostgresRepository) *ExtractService {
 	return &ExtractService{
-		InitExtraction:   config.GetInitExtraction(),
-		FinishExtraction: config.GetFinishExtraction(),
-		Title:            config.GetTitle(),
-		Subtitle:         config.GetSubtitle(),
+		InitExtraction:       config.GetInitExtraction(),
+		FinishExtraction:     config.GetFinishExtraction(),
+		Title:                config.GetTitle(),
+		Subtitle:             config.GetSubtitle(),
+		IndicationRepository: indicationRepo,
 	}
 }
 
@@ -47,8 +50,16 @@ func (s *ExtractService) ExtractDataFromPDF(fileBuffer *multipart.FileHeader) er
 	data := s.processFilePerPage(pdfReader, &totalPages)
 	file.Close()
 
-	//TODO sofrerá alteração
-	_ = s.ProcessData(data)
+	indications := s.ProcessData(data)
+
+	if len(indications) > 0 {
+		for _, indication := range indications {
+			errSave := s.IndicationRepository.SaveIndication(&indication)
+			if errSave != nil {
+				log.Errorf("[ExtractDataFromPDF] - Erro ao salvar indicação no banco - %s", errSave)
+			}
+		}
+	}
 
 	return nil
 }
