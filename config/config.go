@@ -48,6 +48,10 @@ func GetSubtitle() string {
 	return getEnvironmentFromName("SUBTITLE")
 }
 
+func GetURLConsultDiaries() string {
+	return getEnvironmentFromName("URL_CONSULT_DIARIO")
+}
+
 func getEnvironmentFromName(name string) (env string) {
 	env = os.Getenv(name)
 	if env == "" {
