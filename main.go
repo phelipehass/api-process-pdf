@@ -11,7 +11,6 @@ import (
 	"database/sql"
 	"github.com/bamzi/jobrunner"
 	"github.com/gofiber/fiber/v2"
-	"time"
 )
 
 func main() {
@@ -31,12 +30,19 @@ func main() {
 		GetDiariesUrls: diariesService,
 		Redis:          redisClient,
 	})
-	jobrunner.Every(10*time.Hour, &job.GetDiaries{
+
+	//TODOS OS DIAS 23h
+	jobrunner.Schedule("TZ=America/Sao_Paulo 0 23 * * *", &job.GetDiaries{
 		GetDiariesUrls: diariesService,
 		Redis:          redisClient,
 	})
 
-	api.Handlers(app, extractService)
+	extractData := api.NewExtractData()
+
+	extractData.AddServiceExtract(extractService)
+	extractData.AddRedisClient(redisClient)
+	extractData.AddDiariesService(diariesService)
+	extractData.Handlers(app)
 	app.Listen(":" + config.ApiPort())
 
 	jobrunner.Stop()
