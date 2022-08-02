@@ -2,7 +2,7 @@ package service
 
 import (
 	"api/config"
-	"api/extract_data_from_pdf/repository"
+	"api/extractDataFromPdf/repository"
 	"fmt"
 	"github.com/apex/log"
 	"github.com/ledongthuc/pdf"

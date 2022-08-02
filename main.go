@@ -2,9 +2,9 @@ package main
 
 import (
 	"api/config"
-	"api/extract_data_from_pdf/delivery/api"
-	"api/extract_data_from_pdf/repository"
-	"api/extract_data_from_pdf/service"
+	"api/extractDataFromPdf/delivery/api"
+	"api/extractDataFromPdf/repository"
+	"api/extractDataFromPdf/service"
 	diaryRepository "api/getDiariesFromCouncil/repository"
 	diaryService "api/getDiariesFromCouncil/service"
 	"api/job"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"api/extract_data_from_pdf/service"
+	"api/extractDataFromPdf/service"
 	diaryService "api/getDiariesFromCouncil/service"
 	"api/job"
 	"github.com/bamzi/jobrunner"

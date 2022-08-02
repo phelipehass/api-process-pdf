@@ -1,4 +1,4 @@
-package extract_data_from_pdf
+package extractDataFromPdf
 
 import "api/models"
 
