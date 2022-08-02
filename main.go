@@ -5,8 +5,8 @@ import (
 	"api/extract_data_from_pdf/delivery/api"
 	"api/extract_data_from_pdf/repository"
 	"api/extract_data_from_pdf/service"
-	repository2 "api/getDiariesFromCouncil/repository"
-	service2 "api/getDiariesFromCouncil/service"
+	diaryRepository "api/getDiariesFromCouncil/repository"
+	diaryService "api/getDiariesFromCouncil/service"
 	"api/job"
 	"database/sql"
 	"github.com/bamzi/jobrunner"
@@ -42,11 +42,11 @@ func main() {
 	jobrunner.Stop()
 }
 
-func configService(db *sql.DB) (extractService *service.ExtractService, diariesService *service2.GetDiariesFromCouncilService) {
-	restRepo := repository2.NewRepositoryRest("http://legiscam.cvj.sc.gov.br/", "JSESSIONID=")
+func configService(db *sql.DB) (extractService *service.ExtractService, diariesService *diaryService.GetDiariesFromCouncilService) {
+	restRepo := diaryRepository.NewRepositoryRest(config.GetURLBaseConsult(), config.GetCookie())
 	indicationRepo := repository.NewPostgresRepository(db)
-	diaryRepo := repository2.NewPostgresRepository(db)
+	diaryRepo := diaryRepository.NewPostgresRepository(db)
 	extractService = service.NewService(indicationRepo)
-	diariesService = service2.NewService(diaryRepo, restRepo)
+	diariesService = diaryService.NewService(diaryRepo, restRepo)
 	return
 }
