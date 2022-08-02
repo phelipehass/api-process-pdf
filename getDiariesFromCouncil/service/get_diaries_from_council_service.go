@@ -36,9 +36,7 @@ func (s *GetDiariesFromCouncilService) ProcessDiariesJSON(pathParams string) err
 	}
 
 	diaryModels := s.processDiariesData(processData)
-	//TODO antes de salvar, verificar se existe no banco
 	errors := s.saveDiaryModels(diaryModels)
-
 	if errors > 0 {
 		return fmt.Errorf("Ocorreu erro ao salvar %d diários", errors)
 	}
