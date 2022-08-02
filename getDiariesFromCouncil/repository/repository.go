@@ -14,7 +14,7 @@ type RepositoryRest struct {
 func NewRepositoryRest(URL, session string) *RepositoryRest {
 	clientRest := resty.New()
 	clientRest.SetBaseURL(URL).
-		SetHeader("cookie", session)
+		SetHeader("Cookie", session)
 
 	return &RepositoryRest{
 		URL:        URL,
@@ -24,10 +24,9 @@ func NewRepositoryRest(URL, session string) *RepositoryRest {
 
 func (r *RepositoryRest) GetDiaries(params map[string]string) ([]byte, error) {
 	resp, err := r.ClientRest.
-		SetPathParams(params).
 		SetTimeout(120 * time.Second).
 		R().
-		Get("fusion/services/custom/cvj/consulta/getsessoes")
+		Get("fusion/services/custom/cvj/consulta/getsessoes?tipoSessao=1,4,5&dataInicio=2022-05-01&dataFinal=2022-06-13")
 
 	if err != nil {
 		return nil, err
@@ -42,7 +41,7 @@ func (r *RepositoryRest) GetDiaries(params map[string]string) ([]byte, error) {
 		case 403:
 			return nil, fmt.Errorf("Sessão não autorizada - httpCode %d, body %s", resp.StatusCode(), resp.Body())
 		case 404:
-			return nil, fmt.Errorf("Diário não encontrado - httpCode %d, body %s", resp.StatusCode(), resp.Body())
+			return nil, fmt.Errorf("Diários não encontrados - httpCode %d, body %s", resp.StatusCode(), resp.Body())
 		}
 	}
 

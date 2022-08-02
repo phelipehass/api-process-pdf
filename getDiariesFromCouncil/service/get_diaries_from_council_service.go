@@ -26,10 +26,9 @@ func NewService(diaryRepo *repository.PostgresRepository, repoRest *repository.R
 func (s *GetDiariesFromCouncilService) ProcessDiariesJSON() error {
 	//TODO tornar parâmetros dinâmicos conforme job
 	params := map[string]string{
-		"tipoSessao":  "1,4,5",
-		"dataInicio":  "2022-05-01",
-		"dataFinal":   "2022-06-13",
-		"paginaAtual": "2",
+		"tipoSessao": "1,4,5",
+		"dataInicio": "2022-05-01",
+		"dataFinal":  "2022-06-13",
 	}
 
 	body, err := s.RepositoryRest.GetDiaries(params)

@@ -7,10 +7,10 @@ import (
 )
 
 type ProcessData struct {
-	TotalPages  int `json:"paginas"`
-	TotalResult int `json:"total"`
-	ActualPage  int `json:"paginaAtual"`
-	Diaries     []DiaryUnprocessed
+	TotalPages  int                `json:"paginas,omitempty"`
+	TotalResult int                `json:"total,omitempty"`
+	ActualPage  int                `json:"paginaAtual,omitempty"`
+	Diaries     []DiaryUnprocessed `json:"diarios,omitempty"`
 }
 
 type DiaryUnprocessed struct {
