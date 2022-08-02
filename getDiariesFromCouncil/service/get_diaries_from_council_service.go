@@ -25,13 +25,9 @@ func NewService(diaryRepo *repository.PostgresRepository, repoRest *repository.R
 
 func (s *GetDiariesFromCouncilService) ProcessDiariesJSON() error {
 	//TODO tornar parâmetros dinâmicos conforme job
-	params := map[string]string{
-		"tipoSessao": "1,4,5",
-		"dataInicio": "2022-05-01",
-		"dataFinal":  "2022-06-13",
-	}
+	pathParams := "?tipoSessao=1,4,5&dataInicio=2022-05-01&dataFinal=2022-06-13"
 
-	body, err := s.RepositoryRest.GetDiaries(params)
+	body, err := s.RepositoryRest.GetDiaries(pathParams)
 	if err != nil {
 		return err
 	}
@@ -66,10 +62,11 @@ func (s *GetDiariesFromCouncilService) processDiariesData(processData *models.Pr
 
 	for _, diary := range processData.Diaries {
 		diaryModel := models.Diary{}
-		urlDownlaodArchive := s.UrlBase + "fusion/services/CVJ/customService/downloadPDF/" + strconv.FormatInt(diary.Diary, 10)
+		urlDownloadArchive := s.UrlBase + "fusion/services/CVJ/customService/downloadPDF/" + strconv.FormatInt(diary.Diary, 10)
 
 		diaryModel.ID = diary.Diary
-		diaryModel.UrlArchive = urlDownlaodArchive
+		diaryModel.UrlArchive = urlDownloadArchive
+		diaryModel.Cod = diary.Diary
 
 		diaryModels = append(diaryModels, diaryModel)
 	}

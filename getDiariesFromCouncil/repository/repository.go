@@ -22,11 +22,11 @@ func NewRepositoryRest(URL, session string) *RepositoryRest {
 	}
 }
 
-func (r *RepositoryRest) GetDiaries(params map[string]string) ([]byte, error) {
+func (r *RepositoryRest) GetDiaries(pathParams string) ([]byte, error) {
 	resp, err := r.ClientRest.
 		SetTimeout(120 * time.Second).
 		R().
-		Get("fusion/services/custom/cvj/consulta/getsessoes?tipoSessao=1,4,5&dataInicio=2022-05-01&dataFinal=2022-06-13")
+		Get("fusion/services/custom/cvj/consulta/getsessoes" + pathParams)
 
 	if err != nil {
 		return nil, err
