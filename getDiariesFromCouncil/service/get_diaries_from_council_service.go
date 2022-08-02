@@ -6,6 +6,7 @@ import (
 	"api/models"
 	"encoding/json"
 	"fmt"
+	"github.com/apex/log"
 	"strconv"
 )
 
@@ -23,10 +24,7 @@ func NewService(diaryRepo *repository.PostgresRepository, repoRest *repository.R
 	}
 }
 
-func (s *GetDiariesFromCouncilService) ProcessDiariesJSON() error {
-	//TODO tornar parâmetros dinâmicos conforme job
-	pathParams := "?tipoSessao=1,4,5&dataInicio=2022-05-01&dataFinal=2022-06-13"
-
+func (s *GetDiariesFromCouncilService) ProcessDiariesJSON(pathParams string) error {
 	body, err := s.RepositoryRest.GetDiaries(pathParams)
 	if err != nil {
 		return err
@@ -59,14 +57,13 @@ func parseJSONDiaries(diariesJSON []byte) (*models.ProcessData, error) {
 
 func (s *GetDiariesFromCouncilService) processDiariesData(processData *models.ProcessData) []models.Diary {
 	diaryModels := []models.Diary{}
+	diaryModel := models.Diary{}
 
 	for _, diary := range processData.Diaries {
-		diaryModel := models.Diary{}
-		urlDownloadArchive := s.UrlBase + "fusion/services/CVJ/customService/downloadPDF/" + strconv.FormatInt(diary.Diary, 10)
-
-		diaryModel.ID = diary.Diary
-		diaryModel.UrlArchive = urlDownloadArchive
-		diaryModel.Cod = diary.Diary
+		diaryModel = models.Diary{
+			UrlArchive: s.UrlBase + "fusion/services/CVJ/customService/downloadPDF/" + strconv.FormatInt(diary.Diary, 10),
+			Cod:        diary.Diary,
+		}
 
 		diaryModels = append(diaryModels, diaryModel)
 	}
@@ -80,6 +77,7 @@ func (s *GetDiariesFromCouncilService) saveDiaryModels(diaryModels []models.Diar
 	for _, diary := range diaryModels {
 		err := s.DiaryRepository.SaveDiary(&diary)
 		if err != nil {
+			log.Errorf("[saveDiaryModels] - Erro ao salvar o diário %d - Erro: %s", diary.Cod, err.Error())
 			errors += 1
 		}
 	}
